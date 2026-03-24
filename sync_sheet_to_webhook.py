@@ -1,7 +1,6 @@
 import os
 import requests
 import gspread
-import time
 from google.oauth2.service_account import Credentials
 
 # Configuration
@@ -22,34 +21,31 @@ def sync_all_data():
         data_rows = all_rows[1:]
         print(f"📦 Found {len(data_rows)} sites in your Master Sheet.")
         
-        count = 0
+        batch = []  # 🗂️ Collect all payloads first
         for row in data_rows:
             # Map common row structure [Domain, Category, URL, Mails, Region]
             if len(row) < 5: continue
             
-            payload = {
+            batch.append({
                 "Domain (www)": row[0],
                 "Category": row[1],
                 "URL": row[2],
                 "Extracted Mails": row[3],
                 "Region": row[4]
-            }
-            
-            # Send to Webhook
-            try:
-                r = requests.post(WEBHOOK_URL, json=payload, timeout=8)
-                if r.status_code == 200:
-                    count += 1
-                    print(f"👉 [{count}/{len(data_rows)}] SYNCED: {row[0]}")
-                else:
-                    print(f"⚠️ Failed to sync {row[0]} (Error {r.status_code})")
-            except Exception as e:
-                print(f"⚠️ Connection error for {row[0]}")
-            
-            # Small delay to prevent webhook flooding
-            time.sleep(0.1)
+            })
 
-        print(f"\n🏆 SYNC COMPLETE! All {count} Master Sites are now on your Webhook.")
+        # 2. Send ALL sites in ONE request
+        if batch:
+            try:
+                r = requests.post(WEBHOOK_URL, json={"sites": batch, "total": len(batch)}, timeout=60)
+                if r.status_code == 200:
+                    print(f"\n🏆 SYNC COMPLETE! All {len(batch)} sites sent in one webhook request.")
+                else:
+                    print(f"\n⚠️ Webhook returned error {r.status_code}.")
+            except Exception as e:
+                print(f"\n❌ Webhook request failed: {e}")
+        else:
+            print("\n⚠️ No data rows found to sync.")
         
     except Exception as e:
         print(f"❌ Critical Sync Error: {e}")

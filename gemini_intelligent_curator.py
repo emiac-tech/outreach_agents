@@ -74,6 +74,8 @@ def run_curator_session(niche, region, target_count=10):
     if not raw_domains: return
     
     found_in_session = 0
+    batch = []  # 🗂️ Collect all sites before sending one request
+
     for item in raw_domains:
         if found_in_session >= target_count: break
         
@@ -99,21 +101,17 @@ def run_curator_session(niche, region, target_count=10):
             if r.status_code == 200:
                 emails = extract_emails_smart(r.text, domain)
                 
-                # 4. SEND TO WEBHOOK (Primary Delivery)
-                payload = {
+                # 4. ADD TO BATCH (no webhook call yet)
+                batch.append({
                     "Domain (www)": f"www.{domain}",
                     "Category": niche,
                     "URL": f"https://www.{domain}",
                     "Extracted Mails": emails,
                     "Region": region
-                }
-                # (Webhook injection logic remains same)
-                try: 
-                    requests.post(WEBHOOK_URL, json=payload, timeout=8)
-                    print("   📡 WEBHOOK INJECTED SUCCESSFUL.")
-                except: print("   ⚠️ Webhook failed.")
+                })
+                print(f"   📦 Queued for batch: {domain}")
                 
-                # 5. ENTERPRISE SAVE: Postgres + Webhook
+                # 5. ENTERPRISE SAVE: Postgres
                 save_to_memory(domain, niche, region, emails)
                 
                 found_in_session += 1
@@ -122,6 +120,19 @@ def run_curator_session(niche, region, target_count=10):
                 print(f"   ⚠️ Site error ({r.status_code}). Skipping...")
         except Exception as e:
             print(f"   ⚠️ Connection error. Skipping...")
+
+    # 6. SEND ALL SITES IN ONE WEBHOOK REQUEST
+    if batch:
+        try:
+            r = requests.post(WEBHOOK_URL, json={"sites": batch, "total": len(batch)}, timeout=30)
+            if r.status_code == 200:
+                print(f"   📡 WEBHOOK BATCH SENT: {len(batch)} sites in one request.")
+            else:
+                print(f"   ⚠️ Webhook batch failed (Error {r.status_code}).")
+        except Exception as e:
+            print(f"   ⚠️ Webhook batch request error: {e}")
+    else:
+        print("   ⚠️ No sites to send to webhook.")
             
     print(f"\n✅ Session Finished. Added {found_in_session} PREMIUM sites to your sheet.")
 

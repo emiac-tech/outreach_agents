@@ -56,6 +56,8 @@ def process_enrichment():
     rows = ws.get_all_values()
     # Header: ['Domain', 'Category', 'Region', 'URL', 'Extracted Mails']
     
+    batch = []  # 🗂️ Collect all payloads before sending
+
     for i in range(1, len(rows)): # Skip header
         row = rows[i]
         domain_raw = row[0]
@@ -82,20 +84,28 @@ def process_enrichment():
         ws.update_cell(i+1, 3, region) # Region
         ws.update_cell(i+1, 5, emails) # Emails
         
-        # 4. Push to Webhook
-        payload = {
+        # 4. Add to batch (no webhook call yet)
+        batch.append({
             "Domain (www)": domain_raw,
             "Category": category,
             "URL": url,
             "Extracted Mails": emails,
             "Region": region,
             "Enrichment Source": "Gemini-Enrich"
-        }
-        try: 
-            requests.post(WEBHOOK_URL, json=payload, timeout=8)
-            print(f"   ✅ SUCCESS: {region} | {emails}")
-        except: print(f"   ⚠️ Webhook failed for {domain}")
-        
+        })
+        print(f"   📦 Queued: {region} | {emails}")
+
+    # 5. Send all enriched sites in ONE webhook request
+    if batch:
+        try:
+            r = requests.post(WEBHOOK_URL, json={"sites": batch, "total": len(batch)}, timeout=60)
+            if r.status_code == 200:
+                print(f"\n📡 WEBHOOK BATCH SENT: {len(batch)} enriched sites in one request.")
+            else:
+                print(f"\n⚠️ Webhook batch failed (Error {r.status_code}).")
+        except Exception as e:
+            print(f"\n❌ Webhook batch request error: {e}")
+    
     print("\n🏆 PROJECT COMPLETE. ALL MAILS ENRICHED AND REGIONS IDENTIFIED.")
 
 if __name__ == "__main__":
