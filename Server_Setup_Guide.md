@@ -51,7 +51,23 @@ touch .env
 
 ---
 
-### 🚀 5. Running the Agent (Autonomous Loop)
+### 🐳 5. Recommended: Docker Deployment (Fast & Clean)
+Using Docker ensures the agent runs identically on your server without dependency conflicts.
+
+```bash
+# 1. Clone & Setup
+git clone https://github.com/emiac-tech/outreach_agents.git
+cd outreach_agents
+
+# 2. Build and Start the container
+# Ensure your .env and credentials.json are in this folder
+docker-compose up --build -d
+
+# 3. View Logs (Watch the Brainstorming happen)
+docker logs -f intelligent-outreach-curator
+```
+
+### 🚀 6. Traditional Deployment (Non-Docker)
 To run the agent manually:
 ```bash
 python3 gemini_intelligent_curator.py
@@ -65,8 +81,8 @@ Use a `crontab` to find 100 new sites every morning at 9:00 AM:
 
 ---
 
-### 🚦 6. Monitoring & Logs
-*   **Memory Bank:** The script uses `master_scraped_domains.txt` to remember all processed sites. **Do not delete this file**, or you will get duplicates.
-*   **Logs:** Any errors will be printed to the terminal console or saved to your cron logs.
+### 🚦 7. Monitoring & Logs
+*   **Memory Bank:** The script uses `master_scraped_domains.txt` to remember all processed sites. This is mapped via Docker volumes so your data persists even if the container restarts. **Do not delete this file.**
+*   **Logs:** Any errors will be visible in `docker logs`.
 
 **Everything is now ready for production launch.**

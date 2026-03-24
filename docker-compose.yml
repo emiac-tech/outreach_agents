@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  outreach-agent:
+    build: .
+    container_name: intelligent-outreach-curator
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      # Ensure the master memory file is saved on the host machine
+      - ./master_scraped_domains.txt:/app/master_scraped_domains.txt
+      # (Optional) Mount your credentials file if it's external
+      - ./credentials.json:/app/credentials.json
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Example scheduling: Run daily at 9am (handled in script or cron on host)
+    # For now, it will run exactly what gemini_intelligent_curator.py defines
