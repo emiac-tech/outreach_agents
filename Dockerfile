@@ -25,5 +25,8 @@ COPY . .
 # Ensure the memory file exists in the container
 RUN touch master_scraped_domains.txt
 
-# Start the agent orchestrator
-CMD ["python", "gemini_intelligent_curator.py"]
+# Expose port 5000 for n8n API calls
+EXPOSE 5000
+
+# Start the agent's API server
+CMD ["python", "agent_api_server.py"]

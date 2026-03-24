@@ -11,11 +11,11 @@ from urllib.parse import urljoin
 # ============================================================
 #  💎 GEMINI INTELLIGENT AGENT - V1 (ORCHESTRATOR)
 # ============================================================
-load_dotenv("/Users/sakshiagarwal/Desktop/Extracting Mails/.env")
+load_dotenv(".env")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Paths & IDs
-MEMORY_FILE          = "/Users/sakshiagarwal/Desktop/Extracting Mails/master_scraped_domains.txt"
+MEMORY_FILE          = "master_scraped_domains.txt"
 WEBHOOK_URL          = "https://flow.emiactech.com/webhook/receivers-hook"
 
 # Filters & Headers

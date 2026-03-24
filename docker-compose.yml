@@ -4,8 +4,8 @@ services:
   outreach-agent:
     build: .
     container_name: intelligent-outreach-curator
-    restart: unless-stopped
-    env_file: .env
+    ports:
+      - "5000:5000"
     volumes:
       # Ensure the master memory file is saved on the host machine
       - ./master_scraped_domains.txt:/app/master_scraped_domains.txt
