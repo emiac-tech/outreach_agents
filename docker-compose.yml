@@ -7,10 +7,9 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      # Ensure the master memory file is saved on the host machine
-      - ./master_scraped_domains.txt:/app/master_scraped_domains.txt
-      # (Optional) Mount your credentials file if it's external
-      - ./credentials.json:/app/credentials.json
+      # Volume no longer needed for memory as we are using an external SQL DB
+      - ./.env:/app/.env
+    env_file: .env
     environment:
       - PYTHONUNBUFFERED=1
     # Example scheduling: Run daily at 9am (handled in script or cron on host)

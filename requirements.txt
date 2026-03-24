@@ -7,3 +7,4 @@ beautifulsoup4
 schedule
 flask
 flask-cors
+psycopg2-binary
