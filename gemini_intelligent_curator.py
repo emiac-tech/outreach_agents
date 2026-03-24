@@ -1,8 +1,7 @@
 import os
-import json
+import schedule
 import time
 import requests
-import re
 import re
 from google import genai
 from google.genai import types
@@ -94,6 +93,34 @@ def run_curator_session(niche, region, target_count=10):
             
     print(f"\n✅ Session Finished. Added {found_in_session} PREMIUM sites to your sheet.")
 
+# ============================================================
+#  🚦 SCHEDULER: AUTONOMOUS 24/7 OPERATION
+# ============================================================
+
+def job():
+    print(f"\n--- 🏁 DAILY RUN STARTING [Daily Goal: 300 Sites] ---")
+    
+    # 300 sites spread across 5 regions to guarantee variety
+    regions = ["UAE (Premium)", "Saudi Arabia (KSA)", "Egypt", "Qatar & Kuwait", "Jordan & Levant"]
+    niche = "Premium Business, Editorials & PR Agencies"
+    
+    # Target 60 sites per region to reach 300 total
+    for region in regions:
+        print(f"\n🌍 Starting Enrichment Batch for: {region}")
+        run_curator_session(niche, region, target_count=60)
+        
+    print(f"\n--- ✅ 300-SITE DAILY RUN COMPLETE. RESUMING STANDBY. ---")
+
 if __name__ == "__main__":
-    # Test Run for Iraq & Tech
-    run_curator_session("Technology & National Business", "Iraq", target_count=5)
+    print("🚀 INTELLIGENT AGENT V1: AUTONOMOUS PRODUCTION MODE.")
+    print("⏰ Daily Timer: 09:00 AM.")
+    print("🎯 Daily Target: 300 NEW Premium Sites.")
+    
+    # 1. Schedule Daily at 09:00
+    schedule.every().day.at("09:00").do(job)
+    
+    # 2. Start the 24/7 Daemon
+    print("🟢 Standby Mode Active. Monitoring timer...")
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
