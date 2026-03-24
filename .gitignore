@@ -1,0 +1,15 @@
+.env
+venv/
+__pycache__/
+*.txt
+*.csv
+output_table.csv
+RULEBOOK.md
+Agent_Architecture.md
+SEO_Team_Rulebook.md
+Gemini_Agent_Master_Plan.md
+apify_guest_post_agent/
+autonomous_local_curator_v*.py
+guest_post_agent.py
+100_MENA_PR_Sites.md
+requirements.txt
