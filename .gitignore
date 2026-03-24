@@ -12,4 +12,3 @@ apify_guest_post_agent/
 autonomous_local_curator_v*.py
 guest_post_agent.py
 100_MENA_PR_Sites.md
-requirements.txt

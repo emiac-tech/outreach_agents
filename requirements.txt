@@ -1,0 +1,6 @@
+google-genai
+python-dotenv
+requests
+gspread
+google-auth
+beautifulsoup4
