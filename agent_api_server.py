@@ -72,7 +72,7 @@ def health_check():
         "System": "Intelligent Outreach Agent V1",
         "Agent Status": AGENT_STATUS,
         "Gemini API": gemini_status,
-        "Memory Bank Size": f"{os.path.getsize('/Users/sakshiagarwal/Desktop/Extracting Mails/master_scraped_domains.txt')} bytes",
+        "Memory Bank Size": "PostgreSQL (external)",
         "Last Log": LAST_RUN_LOG
     })
 

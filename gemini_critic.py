@@ -5,10 +5,10 @@ from google.genai import types
 from dotenv import load_dotenv
 
 # Load Environment and Configure Gemini
-load_dotenv("/Users/sakshiagarwal/Desktop/Extracting Mails/.env")
+load_dotenv(".env")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-MEMORY_FILE = "/Users/sakshiagarwal/Desktop/Extracting Mails/master_scraped_domains.txt"
+MEMORY_FILE = "master_scraped_domains.txt"
 
 def load_memory():
     if not os.path.exists(MEMORY_FILE): return set()

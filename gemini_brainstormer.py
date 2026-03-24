@@ -5,7 +5,7 @@ from google.genai import types
 from dotenv import load_dotenv
 
 # Load Environment and Configure Gemini
-load_dotenv("/Users/sakshiagarwal/Desktop/Extracting Mails/.env")
+load_dotenv(".env")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def brainstorm_premium_domains(niche, region, count=20):
