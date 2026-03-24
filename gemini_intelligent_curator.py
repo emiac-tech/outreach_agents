@@ -3,11 +3,10 @@ import json
 import time
 import requests
 import re
-import gspread
+import re
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
-from google.oauth2.service_account import Credentials
 from urllib.parse import urljoin
 
 # ============================================================
@@ -17,8 +16,6 @@ load_dotenv("/Users/sakshiagarwal/Desktop/Extracting Mails/.env")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Paths & IDs
-SERVICE_ACCOUNT_FILE = "/Users/sakshiagarwal/Downloads/high-apricot-409308-6ebb2217d023.json"
-GOOGLE_SHEET_ID      = "1H-2TBmVdoWwuHaxU671h0_gpkLApWEBdp789HITC7hQ"
 MEMORY_FILE          = "/Users/sakshiagarwal/Desktop/Extracting Mails/master_scraped_domains.txt"
 WEBHOOK_URL          = "https://flow.emiactech.com/webhook/receivers-hook"
 
@@ -40,10 +37,6 @@ def extract_emails_smart(html_text, domain):
 
 def run_curator_session(niche, region, target_count=10):
     print(f"\n🚀 Starting Intelligent Curation Session: [{niche}] in [{region}]")
-    
-    # GSheet Setup
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"])
-    ws = gspread.authorize(creds).open_by_key(GOOGLE_SHEET_ID).worksheet("Combined Data")
     
     # 1. AI BRAINSTORMING (Gemini)
     print("🧠 AI Brainstorming premium domains...")
@@ -72,11 +65,7 @@ def run_curator_session(niche, region, target_count=10):
             if r.status_code == 200:
                 emails = extract_emails_smart(r.text, domain)
                 
-                # 4. APPEND TO GOOGLE SHEET (5-Column)
-                row = [f"www.{domain}", niche, f"https://www.{domain}", emails, region]
-                ws.append_row(row, value_input_option='USER_ENTERED')
-                
-                # 5. SEND TO WEBHOOK (Real-Time Notification)
+                # 4. SEND TO WEBHOOK (Primary Delivery)
                 payload = {
                     "Domain (www)": f"www.{domain}",
                     "Category": niche,
@@ -84,8 +73,14 @@ def run_curator_session(niche, region, target_count=10):
                     "Extracted Mails": emails,
                     "Region": region
                 }
-                try: requests.post(WEBHOOK_URL, json=payload, timeout=8)
-                except Exception: print("   ⚠️ Webhook post failed.")
+                try: 
+                    r_webhook = requests.post(WEBHOOK_URL, json=payload, timeout=8)
+                    if r_webhook.status_code == 200:
+                        print("   📡 WEBHOOK INJECTED SUCCESSFUL.")
+                    else:
+                        print(f"   ⚠️ Webhook returned error: {r_webhook.status_code}")
+                except Exception as e: 
+                    print(f"   ⚠️ Webhook connection failed: {e}")
                 
                 # Save to Memory
                 with open(MEMORY_FILE, 'a') as f: f.write(f"{domain}\n")
